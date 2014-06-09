@@ -2,6 +2,7 @@
 
 dn=`dirname $0`
 . "$dn/vars.sh"
+. "$dn/tools.sh"
 
 if [ $# -lt 1 ];
 then
@@ -19,7 +20,7 @@ fi
 
 
 
-sar $core $CPUINT | while read line
+while read line
 do
 
   line=`echo -e "$line" |tail -n1`
@@ -43,10 +44,9 @@ do
   I=`echo "$line" | awk -F' *' '{print $9}'`
   T=`echo "$U $S"  | awk '{printf "%f", $1 + $2}'`
 
-  curl -X POST -d "[ {\"name\":\"cpu.cpu$s\",
+  postData "[ {\"name\":\"cpu.cpu$s\",
 		    \"columns\":[\"total\",\"user\",\"system\",\"idle\"],
-		    \"points\":[[$T,$U,$S,$I]]  } ]" \
-		"http://$HOST:$PORT/db/$DB/series?u=root&p=root" &
-done
+		    \"points\":[[$T,$U,$S,$I]]  } ]"  &
+done < <(sar $core $CPUINT)
 
 exit 0

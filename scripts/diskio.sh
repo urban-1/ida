@@ -70,17 +70,17 @@ function startDisks(){
     
     # tps  rd_sec/s  wr_sec/s  avgrq-sz  avgqu-sz     await     svctm     %util
     tps=`echo "$line" | awk -F' *' '{print $4}'`
-    rdsec=`echo "$line" | awk -F' *' '{print $5}'`
+    rdsec=`echo "$line" | awk -F' *' '{printf "%.0f",$5*512*8}'`
     
-    wrsec=`echo "$line" | awk -F' *' '{print $6}'`
+    wrsec=`echo "$line" | awk -F' *' '{printf "%.0f",$6*512*8}'`
     wait=`echo "$line" | awk -F' *' '{print $9}'`
     util=`echo "$line" | awk -F' *' '{print $11}'`
     
   
-    curl -X POST -d "[ {\"name\":\"io.$dname\",
+    postData "[ {\"name\":\"io.$dname\",
   		    \"columns\":[\"tps\",\"read\",\"write\",\"wait\",\"util\"],
-  		    \"points\":[[$tps,$rdsec,$wrsec,$wait,$util]]  } ]" \
-  		"http://$HOST:$PORT/db/$DB/series?u=$USER&p=$PASS" &
+  		    \"points\":[[$tps,$rdsec,$wrsec,$wait,$util]]  } ]" &
+  		    
   done < <(sar -p -d $DISKIOINT)
 }
 

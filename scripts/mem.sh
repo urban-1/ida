@@ -17,14 +17,13 @@ function startMem(){
     sused=`free -b | grep Swap | awk -F' *' '{print $3}'`
     sfree=`free -b | grep Swap | awk -F' *' '{print $4}'`
     
-    curl -X POST -d "[ {\"name\":\"mem.ram\",
+   postData "[ {\"name\":\"mem.ram\",
 		  \"columns\":[\"used\",\"free\"],
 		  \"points\":[[$used,$free]]  },
 		  {\"name\":\"swap\",
 		  \"columns\":[\"used\",\"free\"],
 		  \"points\":[[$sused,$sfree]] }
-		  ]" \
-	      "http://$HOST:$PORT/db/$DB/series?u=root&p=root" &
+		  ]"  &
 
     sleep $MEMINT;
   done

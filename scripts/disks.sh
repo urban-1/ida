@@ -58,8 +58,7 @@ function startDisks(){
     first=0;
     
     
-    curl -X POST -d "[$val]" \
-	    "http://$HOST:$PORT/db/$DB/series?u=$USER&p=$PASS" &
+    postData "[$val]"  &
     val="";
     
     sleep $DISKINT

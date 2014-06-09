@@ -62,8 +62,7 @@ function startSrvMon(){
       
     done < "$dn/srv.conf"
     
-    curl -X POST -d "[$val]" \
-	"http://$HOST:$PORT/db/$DB/series?u=$USER&p=$PASS" &
+    postData "[$val]" &
     
     sleep $SRVINT;
   done

@@ -75,10 +75,9 @@ function startIfs(){
     tx=`echo "($tx * 8 * 1024)/1" | bc`
     
   
-    curl -X POST -d "[ {\"name\":\"net.if.$iface\",
+    postData "[ {\"name\":\"net.if.$iface\",
   		    \"columns\":[\"rx\",\"tx\",\"pxpps\",\"txpps\"],
-  		    \"points\":[[$rx,$tx,$rxpps,$txpps]]  } ]" \
-  		"http://$HOST:$PORT/db/$DB/series?u=$USER&p=$PASS" &
+  		    \"points\":[[$rx,$tx,$rxpps,$txpps]]  } ]" &
   
   done
 }

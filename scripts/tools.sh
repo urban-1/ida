@@ -26,3 +26,12 @@ function killallme(){
   sleep 0.1
   killall `basename $0`
 }
+
+
+#
+# Posts data to the server
+# $1: Data FULLY FORMATED... "points": [[...]]
+#
+function postData(){
+  curl -X POST -d "$1" "http://$HOST:$PORT/db/$DB/series?u=$USER&p=$PASS" 
+}
