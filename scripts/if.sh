@@ -74,10 +74,19 @@ function startIfs(){
     rx=`echo "($rx * 8 * 1024)/1" | bc`
     tx=`echo "($tx * 8 * 1024)/1" | bc`
     
+    
+    speed=`cat /sys/class/net/$iface/speed 2> /dev/null`
+    if [ $? -ne 0 ]
+    then
+      speed=0;
+    fi
+    
+    speed=`echo $speed | awk '{print $0*1000000}'`
+    
   
     postData "[ {\"name\":\"net.if.$iface\",
-  		    \"columns\":[\"rx\",\"tx\",\"pxpps\",\"txpps\"],
-  		    \"points\":[[$rx,$tx,$rxpps,$txpps]]  } ]" &
+  		    \"columns\":[\"rx\",\"tx\",\"pxpps\",\"txpps\",\"speed\"],
+  		    \"points\":[[$rx,$tx,$rxpps,$txpps,$speed]]  } ]" &
   
   done
 }

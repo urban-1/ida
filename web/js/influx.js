@@ -1,7 +1,7 @@
 
 function cl(x) { console.log (x);}
 
-function unitFormat(format, val) { 
+function unitFormat1024(format, val) { 
   if (typeof val == 'number') { 
       if (!format) { 
 	  format = '%.1f'; 
@@ -14,6 +14,27 @@ function unitFormat(format, val) {
       }
       if (Math.abs(val) >= 1024) {
 	  return (val / 1024).toFixed(1) + 'K';
+      }
+      return String(val.toFixed(1));
+  } 
+  else { 
+      return String(val); 
+  }
+}
+
+function unitFormat(format, val) { 
+  if (typeof val == 'number') { 
+      if (!format) { 
+	  format = '%.1f'; 
+      } 
+      if (Math.abs(val) >= 1000000000 ) {
+	  return (val / 1000000000).toFixed(1) + 'G';
+      }
+      if (Math.abs(val) >= 1000000 ) {
+	  return (val / 1000000 ).toFixed(1) + 'M';
+      }
+      if (Math.abs(val) >= 1000) {
+	  return (val / 1000).toFixed(1) + 'K';
       }
       return String(val.toFixed(1));
   } 
@@ -34,7 +55,6 @@ function InfluxPlot(el,flux,plot){
 }
 
 InfluxPlot.prototype._init = function (){
-  // $.jqplot('chartdiv',  [[[1, 2],[3,5.12],[5,13.1],[7,33.6],[9,85.9],[11,219.9]]]);
   
   var f = this.flux
   var urlBase = "http://"+f.host+":"+f.port+"/db/"+f.db+"/series?u="+f.user+"&p="+f.pass;
@@ -89,7 +109,7 @@ InfluxPlot.prototype.processTimeSeriesData = function(d){
   this.plot = $.extend(true,this.plot,
     {axes:{xaxis:{renderer:$.jqplot.DateAxisRenderer}}}
   );
-//     
+  
   this.plot = $.extend(true,this.plot,
     {seriesDefaults:{showMarker:false}}
   );
