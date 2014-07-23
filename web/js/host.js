@@ -1,27 +1,32 @@
 // TODO: GUI select (tree)
-var DB="mon.serusl03" 
+var DB="UEssexC" 
+var HOST;
 
-var FLUX = {
-  host :"serusl03",
-  port:8086,
-  user: "root",
-  pass: "root",
-  db: DB
-}
 
 
 
 
 
 $().ready(function(){
+  HOST = new I.InfluxHost({
+    host :"scampus",
+    port:8086,
+    user: "root",
+    pass: "root"
+  });
+  
+  
+  cl(HOST);
   
   // Make options
-  var fluxOpts = $.extend(FLUX, {
+  var fluxOpts = $.extend(HOST.getHostConfig(), {
     from: "net.if.eth0",
+    db: DB,
     select: ["rx", "tx", "speed"],
     where: "time > now() -1h"
 //     group: ""
   });
+  
   
   var plotOpts = {
       type: "time", 
@@ -41,6 +46,6 @@ $().ready(function(){
 	}
       }
   };
-  var tp = new InfluxPlot($('#test'),fluxOpts,plotOpts);
+  var tp = new I.InfluxPlot($('#test'),fluxOpts,plotOpts);
   
 })
