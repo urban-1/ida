@@ -20,7 +20,7 @@ function startMem(){
    postData "[ {\"name\":\"mem.ram\",
 		  \"columns\":[\"used\",\"free\"],
 		  \"points\":[[$used,$free]]  },
-		  {\"name\":\"swap\",
+		  {\"name\":\"mem.swap\",
 		  \"columns\":[\"used\",\"free\"],
 		  \"points\":[[$sused,$sfree]] }
 		  ]"  &

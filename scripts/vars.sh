@@ -14,7 +14,7 @@ PASS="root";
 # Intervals... to be increased for production...
 CPUINT=5		# CPU INTERVAL
 MEMINT=60		# MEMORY INTERVAL
-IFINT=2			# NET INTERFACE
+IFINT=5			# NET INTERFACE
 DISKINT=60		# DISK INTERVAL
 DISKIOINT=5		# DISK IO INTERVAL
 SRVINT=60		# service status

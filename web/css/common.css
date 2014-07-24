@@ -1,5 +1,9 @@
 /* CSS Document */
-
+*, *:before, *:after {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
 body {
 /* 	background:#9343B9; */
 	text-align:center;
@@ -7,7 +11,13 @@ body {
 	padding:0;
 	font:normal 0.8em/1.2em verdana,aria,sans-serif;
 /* 	color:#666; */
-	}
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: moz-none;
+	-ms-user-select: none;
+	user-select: none;
+}
 a {
 	color:#FFF;
 	text-decoration:none;
@@ -58,6 +68,7 @@ a:hover {
 	padding:10px;
 /* 	background:#ECB9E8; */
 	z-index:100;
+	overflow: auto;
 	}
 #rightcol {
 	position:relative;
@@ -101,7 +112,8 @@ a:hover {
 	
 .divfloat{
   display: inline-block;
-  width: 50%;
+  width: 49%;
   background:lightgray;
   height: 200px;
+  padding:4px;
 }
