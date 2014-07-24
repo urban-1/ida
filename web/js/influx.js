@@ -185,6 +185,7 @@ processTimeSeriesData: function(d){
     };
     this.plot = $.extend(true,options,this.plot);
   }
+  cl(this.plot)
   this.jq = $.jqplot(this.el.attr("id"), plotData, this.plot);
 
 },

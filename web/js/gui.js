@@ -113,12 +113,14 @@ function handlePlotDrop(target,path) {
     template = template[0];
   }
   
+  var title = (template.plotOpts.title) ? template.plotOpts.title : path.join('.');
+  
   // Save the plot
   plots[id] = new I.InfluxPlot($('#'+id),
 	      $.extend({},template.fluxOpts,HOST.getHostConfig(),{
 		    db:path[1],
 		    from: path[2]
 	      }),
-	      $.extend({},template.plotOpts,{title:path.join('.')})
+	      $.extend({},template.plotOpts,{title:title})
 	    );
 }

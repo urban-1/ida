@@ -20,7 +20,7 @@ TMPS = $.extend({},TMPS,{
 	    pad: 1.2
 	},
 	axes: {
-	    xaxes:{
+	    xaxis:{
 	      
 	    }
 	},
@@ -49,11 +49,15 @@ TMPS = $.extend({},TMPS,{
 	    showTooltip:true
 	},
 	axesDefaults:{
-	    pad: 1.2
+	    pad: 1.2,
+	    labelRenderer: $.jqplot.canvasAxisLabelRenderer
 	},
 	axes: {
-	    xaxes:{
-	      
+	    yaxis: {
+	      label: 'RTT in milliseconds'
+	    },
+	    xaxis: {
+	      label: 'Time'
 	    }
 	},
 	legend: {
@@ -82,11 +86,15 @@ TMPS = $.extend({},TMPS,{
 	},
 	title: "replace this",
 	axesDefaults:{
-	    pad: 1.2
+	    pad: 1.2,
+	    labelRenderer: $.jqplot.canvasAxisLabelRenderer
 	},
 	axes: {
-	    xaxes:{
-	      
+	    yaxis: {
+	      label: 'Utilization'
+	    },
+	    xaxis: {
+	      label: 'Time'
 	    }
 	},
 	legend: {
@@ -141,7 +149,7 @@ TMPS = $.extend({},TMPS,{
 		pad: 1.2
 	    },
 	    axes: {
-		xaxes:{
+		xaxis:{
 		  
 		}
 	    }
@@ -169,7 +177,7 @@ TMPS = $.extend({},TMPS,{
 	    pad: 1.2
 	},
 	axes: {
-	    xaxes:{
+	    xaxis:{
 	      
 	    }
 	},
