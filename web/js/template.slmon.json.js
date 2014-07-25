@@ -37,12 +37,15 @@ TMPS = $.extend({},TMPS,{
   {
     name: "General Ping Plot",
     fluxOpts: {
-	select: ["mean(avg)", "mean(max)", "mean(min)"],
+	select: ["mean(min)", "mean(max)","mean(avg)"],
 	where: "time > now() - 1d",
 	group: "time(10s)"
     },
     plotOpts:{
 	type: "time", 
+	typeOpts: {
+	    minMax: true
+	},
 	cursor:{ 
 	    show: true,
 	    zoom:true, 
@@ -50,21 +53,24 @@ TMPS = $.extend({},TMPS,{
 	},
 	axesDefaults:{
 	    pad: 1.2,
-	    labelRenderer: $.jqplot.canvasAxisLabelRenderer
+	    labelRenderer: $.jqplot.CanvasAxisLabelRenderer
 	},
 	axes: {
 	    yaxis: {
 	      label: 'RTT in milliseconds'
-	    },
-	    xaxis: {
-	      label: 'Time'
 	    }
 	},
 	legend: {
 	    show:true, 
 	    location: 'nw',
 	    labels: ["Avg", "Max", "Min"]
-	}
+	},
+	series: [{
+            rendererOptions: {
+                highlightMouseDown: true,
+                smooth: true
+            }
+        }]
     }
   }
   ],
@@ -87,14 +93,11 @@ TMPS = $.extend({},TMPS,{
 	title: "replace this",
 	axesDefaults:{
 	    pad: 1.2,
-	    labelRenderer: $.jqplot.canvasAxisLabelRenderer
+	    labelRenderer: $.jqplot.CanvasAxisLabelRenderer
 	},
 	axes: {
 	    yaxis: {
 	      label: 'Utilization'
-	    },
-	    xaxis: {
-	      label: 'Time'
 	    }
 	},
 	legend: {
@@ -108,7 +111,7 @@ TMPS = $.extend({},TMPS,{
  
  "srv": [
       {
-	name: "Uptime",
+	name: "Uptime Pie Chart",
 	fluxOpts: {
 	    select: ["histogram(status)"],
 	    where: "time > now() - 1d",
@@ -144,15 +147,7 @@ TMPS = $.extend({},TMPS,{
 		zoom:true, 
 		showTooltip:true
 	    },
-	    title: "replace this",
-	    axesDefaults:{
-		pad: 1.2
-	    },
-	    axes: {
-		xaxis:{
-		  
-		}
-	    }
+	    title: "replace this"
 	}
       }
   ],
@@ -172,19 +167,56 @@ TMPS = $.extend({},TMPS,{
 	    zoom:true, 
 	    showTooltip:true
 	},
-	title: "replace this",
 	axesDefaults:{
-	    pad: 1.2
+	    pad: 1.2,
+	    labelRenderer: $.jqplot.CanvasAxisLabelRenderer
 	},
 	axes: {
-	    xaxis:{
-	      
+	    yaxis:{
+		label: "Bytes (1024 KMG)"
 	    }
 	},
 	legend: {
 	    show:true, 
 	    location: 'nw',
 	    labels: ["Used", "Free"]
+	}
+    }
+  }
+  ],
+  "disks": [
+  {
+    name: "General Disk Plot",
+    fluxOpts: {
+	select: [ "free","used"],
+	where: "time > now() - 1d",
+    },
+    plotOpts:{
+	type: "time", 
+	kmgUnits: I.unitFormat,
+	stackSeries: true,
+	showMarker: false,
+	seriesDefaults: {
+	    fill: true
+	},
+	cursor:{ 
+	    show: true,
+	    zoom:true, 
+	    showTooltip:true
+	},
+	axesDefaults:{
+	    pad: 1.2,
+	    labelRenderer: $.jqplot.CanvasAxisLabelRenderer
+	},
+	axes: {
+	    yaxis: {
+	      label: 'Bytes'
+	    }
+	},
+	legend: {
+	    show:true, 
+	    location: 'nw',
+	    labels: ["Free","Used"]
 	}
     }
   }

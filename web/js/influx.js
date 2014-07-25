@@ -1,28 +1,4 @@
-/**
- * CLONE AN OBJECT (instead of pointing to it)
- * NEW: Added array option. JS is fucked
- * when it comes to array vs object...
- */
-function clone(o) {
-     if(typeof(o) != 'object' || o == null) return o;
-   
-     var newO = new Object();
-     if (Object.prototype.toString.call( o ) === '[object Array]' ) 
-       newO = new Array();
-   
-     for(var i in o) {
-      // Detect dom ones
-      
-      if (o["map"] == o[i]){
-	newO[i] = o[i];
-      }else if (o[i].parentNode == undefined){
-	newO[i] = clone(o[i]);
-      }else{
-	newO[i] = o[i].cloneNode(false);
-      }
-     }
-     return newO;
- }
+
  
 var I = {
   version: "0.1"
@@ -73,14 +49,16 @@ I.unitFormat = function (format, val) {
 } 
 
 /**
- * Constructor: Element, flux options, plot options
+ * Constructor: Element, flux host, flux options (template,db,series), plot options
  */
-I.InfluxPlot = function (el,flux,plot){
+I.InfluxPlot = function (el,fluxHost,flux,plot){
   this.el = el;
 
   this.flux = flux;
+  this.fluxHost = fluxHost;
   this.plot = plot
-  this.el.html("Loading... please wait")
+  this.el.html("<p>Loading... please wait</p>");
+  this.data={}; // Not used atm
   this._init();
 }
 
@@ -88,40 +66,54 @@ I.InfluxPlot.prototype = {
 
 _init: function (){
   var f = this.flux
-  var urlBase = "http://"+f.host+":"+f.port+"/db/"+f.db+"/series?u="+f.user+"&p="+f.pass;
-  var q="select "+f.select+" from "+f.from;
   
+  var q="select "+f.select+" from "+f.from;
   if (f.where) q+=" where "+f.where;
   if (f.group) q+=" group by "+f.group;
   
-  var postData = {u: f.user, p: f.pass, q:q}
-  
-  
-  urlBase+="&q="+q;
-  
   var ifplot = this;
-  
-  $.ajax({
-    url: urlBase,
-    type: "GET",
-    dataType: "json",
-    success: function(data){
-      ifplot.el.html("");
-      // 1 reply!
-      data=data[0];
-      ifplot.processData(data);
-    },
-    error: function (error){ cl(error.responseText) }
+  this.fluxHost._post(q,f.db,function(d){
+    ifplot.processData(d);
   });
- 
+  
 },
 
+/**
+ * Re-initializes fetching data and ploting
+ */
+fullRefresh: function(){
+  this._init();
+},
+
+/**
+ * Replot only with the same data
+ */
+replot: function(){
+  this.jq.replot();
+},
+
+/**
+ * Process RAW reply from InfluxHost
+ */
 processData: function(d){
+  this.el.html("");
   if (!d) return;
-  if (this.plot.type == "time") this.processTimeSeriesData(d);
-  if (this.plot.type == "histogram") this.processHistogramData(d);
+  if (!d.length) return;
+  
+  // Check plot type
+  if (this.plot.type == "time") 
+    this.processTimeSeriesData(d[0]);
+  else if (this.plot.type == "histogram") 
+    this.processHistogramData(d[0]);
 },
 
+/**
+ * Process histogram data and create a pie
+ * chart. This is str8 forward. The only thing
+ * we do is to convert 0/1 values if appeared as
+ * "label" values to "False/Down" and "True/Up"
+ * respectively
+ */
 processHistogramData: function(d){
 
   var len = d.points.length;
@@ -141,9 +133,28 @@ processHistogramData: function(d){
   this.jq = $.jqplot(this.el.attr("id"), [plotData], this.plot);
 },
 
+/**
+ * This is the core plotting function that deals
+ * with time-series. It expects data in order of
+ * IMPORTANCE except time that is always column 0!
+ * 
+ * Example: Column sequence_number of influx comes
+ * first (after time always) thus can/should be ignored
+ * if it is there... ANY column after the "ignored" or 
+ * "special" are ploted as time-series data.
+ * 
+ * Additionally, this function deals with a number of options
+ * that can be supplied through the template.plot.typeOpts. At
+ * the moment we support min/max based error bar/area diagrams.
+ * As explained earlier, min and max are special data and not
+ * time series data. Therefore the expected order is:
+ * 
+ * time, IGNORE(maybe), min, max, data
+ */
 processTimeSeriesData: function(d){
   if (d.points.length==0) return;
-  var plotData = []
+  var plotData = [];
+  var minMax = [];
   var time = []
   var col = d.points[0].length;
   
@@ -151,14 +162,23 @@ processTimeSeriesData: function(d){
   if ($.inArray("time", d.columns)!=-1) less++;
   if ($.inArray("sequence_number", d.columns)!=-1) less++;
   
-
+  var isMinMax = false;
+  if (this.plot.typeOpts && this.plot.typeOpts.minMax) {
+      isMinMax=true;
+      less+=2;
+  }
   
   // init dimensions
-  for (var j=less; j<col; j++) plotData[j-less] = []
+  for (var j=less; j<col; j++) {
+      plotData[j-less] = [];
+  }
   
   for (var i=0; i<d.points.length; i++) {
     for (var j=less; j<col; j++) {
       plotData[j-less].push([d.points[i][0],d.points[i][j]]);
+      if (isMinMax) {
+	  minMax.push([d.points[i][j-2],d.points[i][j-1]]);
+      }
     }
   }
   
@@ -166,9 +186,23 @@ processTimeSeriesData: function(d){
     {axes:{xaxis:{renderer:$.jqplot.DateAxisRenderer}}}
   );
   
+  // TODO:Maybe move into templates
   this.plot = $.extend(true,this.plot,
     {seriesDefaults:{showMarker:false}}
   );
+  
+  if (isMinMax){
+      this.plot = $.extend(true,this.plot,{
+	series: [{
+            rendererOptions: {
+                // Set the band data on the series.
+                // Bands will be turned on automatically if
+                // valid band data is present.
+                bandData: minMax
+            }
+        }]
+    });
+  }
   
 
   
@@ -185,13 +219,9 @@ processTimeSeriesData: function(d){
     };
     this.plot = $.extend(true,options,this.plot);
   }
-  cl(this.plot)
+  
   this.jq = $.jqplot(this.el.attr("id"), plotData, this.plot);
 
-},
-
-getThis: function (){
-  return this;
 }
 
 }; // End of I.InfluxPlot
@@ -200,6 +230,8 @@ getThis: function (){
  * I.InfluxHost implementation. Global single configuration
  * atm. Supports quering for available dbs and list series 
  * in each DB.
+ * 
+ * Options.exclude can be use to exclude databases
  */
 I.InfluxHost = function(opts){
   this.options = opts;
@@ -274,7 +306,12 @@ _initDatabases: function(){
       var len = data.length;
       
       for (var i=0; i<len; i++) {
+	// Skip empty
 	if (data[i].name=="") continue;
+	// Skip excluded
+	if (ifhost.options.exclude &&
+	    ifhost.options.exclude.indexOf(data[i].name)!=-1) continue;
+	
 	ifhost.data.children.push({
 	  text: data[i].name,
 	  children: []
@@ -346,4 +383,45 @@ _init: function(){
   this._initDatabases();
 }
 
-};
+}; // End of I.InfluxHost
+
+/**
+ * Popup Message
+ */
+I.Popup = function(){
+    this._init();
+}
+
+I.Popup.prototype = {
+    _init: function(){
+	this.el = document.createElement('DIV');
+	this.el.id="tmpPopup";
+	this.el.className = "msg";
+	this.el.style.display = "none";
+	this.el.style.position = "fixed";
+	this.el.style.zIndex = 1001;
+	document.body.appendChild(this.el);
+    },
+    
+    setMsg: function(msg){
+	this.el.innerHTML=msg;
+    },
+    
+    clear: function(){
+	this.el.innerHTML = "";
+    },
+    
+    showAt: function(x,y){
+	this.el.style.left = x+'px';
+	this.el.style.top = y+'px';
+	this.show();
+    },
+    
+    show: function(){
+	this.el.style.display='block';
+    },
+    
+    hide: function(){
+	this.el.style.display='none'
+    }
+}

@@ -1,62 +1,81 @@
 
 
+var tree={};
+var TMPS={};
+var plots={};
+var popup={};
 
 $().ready(function(){
-  
-  for (var t=0; t<templates.length; t++){
-    $.getScript("js/template."+templates[t]+".json.js");
-  }
-  
-  $(window).on("resize", function(){
-    for (var p in plots){
-      if (!plots[p].jq) return;
-      plots[p].jq.replot();
-    }
-  })
-  
-  // Bind dataReady to populate tree
-  $('body').on("dataReady", function(e,d){
-    
-    // Init tree
-    tree=$('#hostList').jstree({ 
-      core: {
-	data: [ HOST.getData() ],
-	check_callback: function(){
-	  return false
-	}
-      },
-      dnd:{
-	copy: false,
-	is_draggable: function(el){
-	  var el = el[0];
-	  if (el.li_attr.series) return true;
-	  return false;
-	}
-      },
-      plugins: ["dnd"]
-    }).data('jstree');
+    popup = new I.Popup();
 
-    
-  })
+    for (var t=0; t<templates.length; t++){
+	$.getScript("js/template."+templates[t]+".json.js");
+    }
+
+    $(window).on("resize", function(){
+	for (var p in plots){
+	    if (!plots[p].jq) return;
+	    plots[p].replot();
+	}
+    })
+
+    // Bind dataReady to populate tree
+    $('body').on("dataReady", function(e,d){
+
+	// Init tree
+	tree=$('#hostList').jstree({ 
+	    core: {
+	    data: [ HOST.getData() ],
+	    check_callback: function(){
+		return false
+	    }
+	    },
+	    dnd:{
+	    copy: false,
+	    is_draggable: function(el){
+		var el = el[0];
+		if (el.li_attr.series) return true;
+		return false;
+	    }
+	    },
+	    plugins: ["dnd"]
+	}).data('jstree');
+	
+    }).on("mousedown", function(){
+	if (popup) popup.hide();
+    })
+
+    // Doc drop
+    $(document).on('dnd_stop.vakata', function(e,obj){
+	var nid = obj.data.nodes[0];
+	var node = tree.get_node(nid);
+
+	// Make path for node
+	var path=tree.get_path(node);
+
+
+	handlePlotDrop(obj.event,obj.event.target,path);
+
+    });
+
+    // USed like "live"
+    $('body').on('mousedown','.tmpSel', function(){
+	var data = JSON.parse($(this).attr('data-all'));
+	var target = document.getElementById(data.tid);
+	handlePlotDrop(null,target,data.path,data.idx);
+    })
   
-  // Doc drop
-  $(document).on('dnd_stop.vakata', function(e,obj){
-    var nid = obj.data.nodes[0];
-    var node = tree.get_node(nid);
-    
-    // Make path for node
-    var path=tree.get_path(node);
-    
-    
-    handlePlotDrop(obj.event.target,path);
-    
-  });
   
   
-  
-//   $('.divfloat').each(function(){
-//     this.ondragover=function(ev){ev.preventDefault();}
-//   })
+    $('.addDiv').on('click',function(){
+	var max = -1;
+	$('div[id^=df]').each(function(){
+	    var num = parseInt(this.id.replace("df",""));
+	    if (num>max) max = num;
+	})
+	max++;
+	$('#flowContainer').append("<div class='divfloat' id='df"+max+"'></div>");
+    })
   
   
 })
@@ -85,7 +104,8 @@ function findTemplate(path){
   return false;
 }
 
-function handlePlotDrop(target,path) {
+function handlePlotDrop(event,target,path, tmpIdx) {
+
   var id = target.id;
   var classN = target.className;
   
@@ -109,18 +129,39 @@ function handlePlotDrop(target,path) {
   }
   
   if (template.length) {
-    // handle pop up
-    template = template[0];
+    if (template.length==1){
+	template = template[0];
+    }
+    else if (tmpIdx!==undefined){
+	template = template[tmpIdx];
+    }
+    else {
+	// handle pop up
+	var msg = "<ul>";
+	for (var i=0; i<template.length; i++){
+	    var data = {
+		idx: i,
+		tid: id,
+		path: path
+	    }
+	    msg+="<li><a class='tmpSel' data-all='"+JSON.stringify(data)+"'>"+template[i].name+"</a></li>";
+	}
+	msg+="</ul>";
+	popup.setMsg(msg);
+	popup.showAt(event.clientX,event.clientY);
+	
+	return;
+    }
   }
   
   var title = (template.plotOpts.title) ? template.plotOpts.title : path.join('.');
   
   // Save the plot
-  plots[id] = new I.InfluxPlot($('#'+id),
-	      $.extend({},template.fluxOpts,HOST.getHostConfig(),{
-		    db:path[1],
-		    from: path[2]
-	      }),
+  plots[id] = new I.InfluxPlot($('#'+id),HOST,
+	      $.extend({},template.fluxOpts,{db:path[1],from: path[2]}),
 	      $.extend({},template.plotOpts,{title:title})
 	    );
 }
+
+
+
