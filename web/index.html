@@ -4,11 +4,12 @@
     <!--   <script src="//code.jquery.com/jquery-1.11.0.min.js"></script> -->
     <script language="javascript" type="text/javascript" src="js/jqplot/jquery.min.js"></script>
     <script language="javascript" type="text/javascript" src="js/jqplot/jquery.jqplot.min.js"></script>
-    <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.cursor.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.cursor.js"></script>
     <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.pieRenderer.js"></script>
     <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.dateAxisRenderer.js"></script>
     <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.canvasTextRenderer.js"></script>
     <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.canvasAxisLabelRenderer.js"></script>
+    <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.highlighter.js"></script>
     
     <script type="text/javascript" language="javascript" src="js/jstree/dist/jstree.min.js"></script>
     
@@ -17,7 +18,7 @@
     <!--  Load the correct configuration    -->
     <script language="javascript" type="text/javascript">
 	var qs = I.getQueryString();
-	cl(qs)
+	
 	if (!qs.cfg) 
 	    qs.cfg = "default";
 	

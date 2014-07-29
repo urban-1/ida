@@ -19,16 +19,18 @@ $().ready(function(){
     $(window).on("resize", function(){
 	for (var p in plots){
 	    if (!plots[p].jq) return;
-	    plots[p].replot();
+	    plots[p].replot({resetAxes:['xaxis','yaxis']});
 	}
     })
     
+    if (typeof INT === 'number') refresh(INT);
+    
     // Add motion to the plots
-    $('.divfloat').resizable(resizeOpts).on('resizestop',function(){
-	
+    $('.divfloat').resizable(resizeOpts);
+    /*.on('resizestop',function(){
 	var id = $(this).children(":first").attr("id");
-	plots[id].replot();
-    });
+// 	plots[id].replot();
+    });*/
 
     // Bind dataChanged to populate tree
     $('body').on("dataChanged", function(e,d){
@@ -92,6 +94,15 @@ $().ready(function(){
   
   
 })
+
+function refresh(INT){
+    setInterval(function(){
+	for (var p in plots){
+	    if (!plots[p].jq) return;
+	    plots[p].fullRefresh({restoreZoom:true});
+	}
+    },INT)
+}
 
 
 function findTemplate(path){
@@ -169,7 +180,9 @@ function handlePlotDrop(event,target,path, tmpIdx) {
   }
   
   var title = (template.plotOpts.title) ? template.plotOpts.title : path.join('.');
-  if (plots[id]) 
+  
+  // Check and delete from plots...
+  if (plots[id] && plots[id].jq) 
       plots[id].jq.destroy();
   
   // Save the plot

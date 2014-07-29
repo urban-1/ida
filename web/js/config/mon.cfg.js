@@ -9,3 +9,5 @@ var HOST = new I.InfluxHost({
   });
 var templates = ["slmon"];
 
+// Refresh interval
+// INT=3000;

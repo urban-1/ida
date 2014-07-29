@@ -80,8 +80,13 @@ I.getQueryString = function() {
 
 I.InfluxPlot.prototype = {
 
-_init: function (){
+/**
+ * Init a graph. If cursor is given, zoom to that 
+ * cursor level!
+ */
+_init: function (cursor){
   var f = this.flux
+  
   
   var q="select "+f.select.join(',')+" from "+f.from;
   if (f.where) q+=" where "+f.where.join(',');
@@ -90,7 +95,17 @@ _init: function (){
   var ifplot = this;
   this.fluxHost._post(q,f.db,null,function(d){
     ifplot.processData(d);
+    if (cursor) {
+	var c = ifplot.jq.plugins.cursor;
+	ifplot.jq.plugins.cursor=cursor;
+	var dataP = cursor._zoom.datapos;
+	var gridP = cursor._zoom.gridpos;
+	c.doZoom(
+	    gridP, dataP, ifplot.jq, cursor
+	);
+    }
   });
+  
   
 },
 
@@ -98,16 +113,31 @@ _init: function (){
  * Re-initializes fetching data and ploting
  */
 fullRefresh: function(){
-  this._init();
+    var z = false
+    if (this.jq!==undefined) {
+	z = $.extend({},this.jq.plugins.cursor);
+	this.jq.destroy();
+	this.jq = null;
+	this.el.empty();
+    }
+    this._init(z);
 },
 
 /**
  * Replot only with the same data but reset axis
  * since date may change to time, etc
  */
-replot: function(){
-  this.jq.replot({resetAxes:true});
+replot: function(opts){
+    this.jq.replot(opts);
 },
+
+/**
+ * Pure redraw, no axis will change
+ */
+redraw: function(){
+  this.jq.redraw();
+},
+
 
 /**
  * Process RAW reply from InfluxHost
@@ -117,11 +147,47 @@ processData: function(d){
   if (!d) return;
   if (!d.length) return;
   
+  // Before sending to the rest, check
+  // that the data are same order as the
+  // select....
+  this._shortLegend(d);
+  
   // Check plot type
   if (this.plot.type == "time") 
     this.processTimeSeriesData(d[0]);
   else if (this.plot.type == "histogram") 
     this.processHistogramData(d[0]);
+},
+
+_shortLegend: function(d){
+    
+    if (!this.plot.legend || !this.plot.legend.labels) return;
+    
+    // returnned columns
+    var col = d[0].columns;
+    
+    var less = 0;
+    if ($.inArray("time", d[0].columns)!=-1) less++;
+    if ($.inArray("sequence_number", d[0].columns)!=-1) less++;
+    
+    var sel = this.flux.select;
+    
+    
+    for (var from=0; from<sel.length; from++){
+	cl(sel[from])
+	var to = col.indexOf(sel[from]);
+	// Invalid, may be a mean
+	if (to == -1) break;
+	to-=less;
+	
+	// 
+	if (from==to) continue;
+	// Change the select order!
+	this.flux.select.splice(to, 0, this.flux.select.splice(from, 1)[0]);
+	// Change the legend order
+	this.plot.legend.labels.splice(to, 0, this.plot.legend.labels.splice(from, 1)[0]);
+    }
+
 },
 
 /**
@@ -179,6 +245,7 @@ processTimeSeriesData: function(d){
   var less = 0;
   if ($.inArray("time", d.columns)!=-1) less++;
   if ($.inArray("sequence_number", d.columns)!=-1) less++;
+  
   
   var isMinMax = false;
   if (this.plot.typeOpts && this.plot.typeOpts.minMax) {

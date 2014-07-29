@@ -22,6 +22,16 @@ TMPS = $.extend({},TMPS,{
 	  legend: {
 	    show:true, 
 	    location: 'e'
+	  },
+	  
+	  highlighter: {
+	    show: true,
+	    formatString:'%s', 
+	    tooltipLocation:'sw', 
+	    useAxesFormatters:false,
+	    tooltipContentEditor: function(str, seriesIndex, pointIndex, plot){
+		return  str +  ", (" +  plot.data[0][pointIndex][1]+")";
+	    }
 	  }
     }
   }

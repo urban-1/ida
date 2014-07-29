@@ -131,6 +131,12 @@ TMPS = $.extend({},TMPS,{
 	  legend: {
 	    show:true, 
 	    location: 'e'
+	  },
+	  highlighter: {
+	    show: true,
+	    formatString:'%s', 
+	    tooltipLocation:'sw', 
+	    useAxesFormatters:false
 	  }
 	}
       },
