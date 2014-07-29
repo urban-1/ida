@@ -1,0 +1,12 @@
+#
+# Urb@n: Alias is needed cause Document root is
+# specified in the main VirtualHost
+#
+Alias /slmon /opt/slmon/web/
+<Directory /opt/slmon/web/>
+	Options Indexes FollowSymLinks MultiViews
+	AllowOverride FileInfo
+	Order allow,deny
+	allow from all
+</Directory>
+

@@ -7,6 +7,5 @@ var HOST = new I.InfluxHost({
     pass: "root",
     exclude:["mon.serusl06"]
   });
-var templates = ["slmon"/*,"sne_maps"*/];
-
+var templates = ["slmon"];
 

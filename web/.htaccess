@@ -1,0 +1,10 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /slmon/
+
+    # Base Map Page
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-l
+    RewriteRule ^([a-zA-Z-_]+)[a-zA-Z-_\.]*$ index.html?cfg=$1 [QSA]
+</IfModule>

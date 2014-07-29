@@ -57,22 +57,38 @@ I.InfluxPlot = function (el,fluxHost,flux,plot){
   this.flux = flux;
   this.fluxHost = fluxHost;
   this.plot = plot
-  this.el.html("<p>Loading... please wait</p>");
   this.data={}; // Not used atm
   this._init();
 }
+
+/**
+ * Get query string as array (special case)
+ */
+I.getQueryString = function() {
+    var qs = {};
+    var query = window.location.href;
+    query = query.replace("http:\/\/","");
+    query = query.split('/');
+    
+    qs.host = query[0];
+    qs.webRoot = query[1];
+    qs.cfg = query[2];
+  
+    return qs;
+}
+
 
 I.InfluxPlot.prototype = {
 
 _init: function (){
   var f = this.flux
   
-  var q="select "+f.select+" from "+f.from;
-  if (f.where) q+=" where "+f.where;
+  var q="select "+f.select.join(',')+" from "+f.from;
+  if (f.where) q+=" where "+f.where.join(',');
   if (f.group) q+=" group by "+f.group;
   
   var ifplot = this;
-  this.fluxHost._post(q,f.db,function(d){
+  this.fluxHost._post(q,f.db,null,function(d){
     ifplot.processData(d);
   });
   
@@ -86,17 +102,18 @@ fullRefresh: function(){
 },
 
 /**
- * Replot only with the same data
+ * Replot only with the same data but reset axis
+ * since date may change to time, etc
  */
 replot: function(){
-  this.jq.replot();
+  this.jq.replot({resetAxes:true});
 },
 
 /**
  * Process RAW reply from InfluxHost
  */
 processData: function(d){
-  this.el.html("");
+  
   if (!d) return;
   if (!d.length) return;
   
@@ -121,6 +138,7 @@ processHistogramData: function(d){
   if (len==0) return;
   
   var inlen = d.points[0].length;
+  var cpos  = d.columns.indexOf("count");
   var plotData = [];
   
   for (var i=0; i<len; i++) {
@@ -128,7 +146,7 @@ processHistogramData: function(d){
     if (val ==1 || val==0){
       val = (val==1) ? "True/Up" : "False/Down"
     } 
-    plotData.push([val,d.points[i][inlen-2]]);
+    plotData.push([val,d.points[i][cpos]]); // fixme: get count pos
   }
   this.jq = $.jqplot(this.el.attr("id"), [plotData], this.plot);
 },
@@ -258,49 +276,55 @@ getData: function(){
 },
 
 _getBaseUrl: function(){
-  var f = this.options;
-  return "http://"+f.host+":"+f.port+"/db" ;
+    var f = this.options;
+    return "http://"+f.host+":"+f.port+"/db" ;
 },
 
-_post: function(q, db, cb){
+/**
+ * Main function to post to an influx server
+ * This takes the query, the database, a last
+ * indicator and the callback. The last ind. is 
+ * used in case of multiple calls in a loop
+ */
+_post: function(q, db, isLast, cb){
   
-  var url = this._getBaseUrl();
-  if (db) url+="/"+db+"/series";
-  
-// XSR with Auth!
-//   var postData = {};
-//   if (q) postData=q;
-//   postData=JSON.stringify(postData);
-//   cl(postData)
-  
-  var ifhost = this;
-  
-  url+="?u="+this.options.user+"&p="+this.options.pass;
-  if (q) url += "&q="+encodeURI(q);
-  
-  
-  $.ajax({
-    url: url,
-    type: "GET",
-//     type: "POST",
-//     data: postData,
-    dataType: "json",
-    success: function(data){
-      if (cb) cb(data,db);
-    },
-    error: function (error){ cl(error.responseText) }
-//     ,
-//     beforeSend: function (xhr) {
-//       xhr.setRequestHeader ("Authorization", "Basic "+btoa(ifhost.options.user+":"+ifhost.options.pass)); 
-//     }
-  });  
+    var url = this._getBaseUrl();
+    if (db) url+="/"+db+"/series";
+    
+    // XSR with Auth!
+    //   var postData = {};
+    //   if (q) postData=q;
+    //   postData=JSON.stringify(postData);
+    //   cl(postData)
+    
+    var ifhost = this;
+    
+    url+="?u="+this.options.user+"&p="+this.options.pass;
+    if (q) url += "&q="+encodeURI(q);
+    
+    
+    $.ajax({
+	url: url,
+	type: "GET",
+    //     type: "POST",
+    //     data: postData,
+	dataType: "json",
+	success: function(data){
+	    if (cb) cb(data,db,isLast);
+	},
+	error: function (error){ cl(error.responseText) }
+    //     ,
+    //     beforeSend: function (xhr) {
+    //       xhr.setRequestHeader ("Authorization", "Basic "+btoa(ifhost.options.user+":"+ifhost.options.pass)); 
+    //     }
+    });  
 },
 
 _initDatabases: function(){
   
   var ifhost = this;
   
-  this._post(null, null,
+  this._post(null, null, null,
     function(data){
       // Link for shortcut
       var len = data.length;
@@ -327,39 +351,41 @@ _initDatabases: function(){
 },
 
 _initEachDB: function(){
-  if (!this.data || !this.data.children) return;
-  
-  var ifhost = this;
-  
-  for (var i=0; i<this.data.children.length; i++) {
+    if (!this.data || !this.data.children) return;
     
-    this._post("list series",this.data.children[i].text,function(data,db){
-      var len = data.length;
-      var dbidx = ifhost._getDataIdxForDB(db);
-      
-      // Sort based on name so they do not change order!
-      data.sort(ifhost._DynCompare('name'));
-      
-      // Each series
-      for (var i=0; i<len; i++) {
-	ifhost.data.children[dbidx].children.push({
-	  text:data[i].name,
-	  li_attr: {series:true}
-	});
-      }
-      
-      // All in place, trigger event
-      $('body').trigger("dataReady");
-    });
-  }
+    var ifhost = this;
+    var isLast = false
+    var len = this.data.children.length;
+    
+    for (var i=0; i<len; i++) {
+	    if (i==len-1)isLast = true
+	    this._post("list series",this.data.children[i].text,isLast,function(data,db,isLast){
+		var len = data.length;
+		var dbidx = ifhost._getDataIdxForDB(db);
+		
+		// Sort based on name so they do not change order!
+		data.sort(ifhost._DynCompare('name'));
+		
+		// Each series
+		for (var j=0; j<len; j++) {
+		    ifhost.data.children[dbidx].children.push({
+			text:data[j].name,
+			li_attr: {series:true}
+		    });
+		}
+		// All in place, trigger event
+		if (isLast)
+		    $('body').trigger("dataChanged");
+	    });
+    }
 },
 
 _getDataIdxForDB: function(name){
-  var len = this.data.children.length;
-  for (var i=0; i<len; i++){
-    if (this.data.children[i].text==name) return i;
-  }
-  return -1;
+    var len = this.data.children.length;
+    for (var i=0; i<len; i++){
+	if (this.data.children[i].text==name) return i;
+    }
+    return -1;
 },
 
 /**
@@ -367,20 +393,20 @@ _getDataIdxForDB: function(name){
  * property ('text') field
  */
 _DynCompare: function (property) {
-  return  function(a,b){
-    return (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
-  }
+    return  function(a,b){
+	return (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+    }
 },
 
 
 
 _init: function(){
-  this.data = {
-    text: this.options.host,
-    children: []
-  };
-  
-  this._initDatabases();
+    this.data = {
+	text: this.options.host,
+	children: []
+    };
+    
+    this._initDatabases();
 }
 
 }; // End of I.InfluxHost

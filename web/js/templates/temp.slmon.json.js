@@ -4,7 +4,7 @@ TMPS = $.extend({},TMPS,{
     name: "General Interface Plot",
     fluxOpts: {
 	select: ["mean(rx)", "mean(tx)", "mean(speed)"],
-	where: "time > now() - 1d",
+	where: ["time > now() - 1d"],
 	group: "time(10s)"
     },
     plotOpts:{
@@ -38,7 +38,7 @@ TMPS = $.extend({},TMPS,{
     name: "General Ping Plot",
     fluxOpts: {
 	select: ["mean(min)", "mean(max)","mean(avg)"],
-	where: "time > now() - 1d",
+	where: ["time > now() - 1d"],
 	group: "time(10s)"
     },
     plotOpts:{
@@ -81,7 +81,7 @@ TMPS = $.extend({},TMPS,{
     name: "General CPU Plot",
     fluxOpts: {
 	select: ["system", "user", "total"],
-	where: "time > now() - 1d",
+	where: ["time > now() - 1d"],
     },
     plotOpts:{
 	type: "time", 
@@ -114,7 +114,7 @@ TMPS = $.extend({},TMPS,{
 	name: "Uptime Pie Chart",
 	fluxOpts: {
 	    select: ["histogram(status)"],
-	    where: "time > now() - 1d",
+	    where: ["time > now() - 1d"],
 	    group: "status"
 	},
 	plotOpts:{
@@ -138,7 +138,7 @@ TMPS = $.extend({},TMPS,{
 	name: "Time 0/1 Services Plot",
 	fluxOpts: {
 	    select: ["status"],
-	    where: "time > now() - 1d",
+	    where: ["time > now() - 1d"],
 	},
 	plotOpts:{
 	    type: "time", 
@@ -156,7 +156,7 @@ TMPS = $.extend({},TMPS,{
     name: "General MEM Plot",
     fluxOpts: {
 	select: ["mean(used)", "mean(free)"],
-	where: "time > now() - 1d",
+	where: ["time > now() - 1d"],
 	group: "time(10s)"
     },
     plotOpts:{
@@ -189,7 +189,7 @@ TMPS = $.extend({},TMPS,{
     name: "General Disk Plot",
     fluxOpts: {
 	select: [ "free","used"],
-	where: "time > now() - 1d",
+	where: ["time > now() - 1d"],
     },
     plotOpts:{
 	type: "time", 

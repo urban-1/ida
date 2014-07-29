@@ -1,25 +1,37 @@
 <html>
 <head>
-  <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="excanvas.js"></script><![endif]-->
-<!--   <script src="//code.jquery.com/jquery-1.11.0.min.js"></script> -->
-  <script language="javascript" type="text/javascript" src="js/jqplot/jquery.min.js"></script>
-  <script language="javascript" type="text/javascript" src="js/jqplot/jquery.jqplot.min.js"></script>
-  <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.cursor.min.js"></script>
-  <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.pieRenderer.js"></script>
-  <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.dateAxisRenderer.js"></script>
-  <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.canvasTextRenderer.js"></script>
-  <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.canvasAxisLabelRenderer.js"></script>
-  
-  <script type="text/javascript" language="javascript" src="js/jstree/dist/jstree.min.js"></script>
-  
-  <script language="javascript" type="text/javascript" src="js/influx.js"></script>
-  <script language="javascript" type="text/javascript" src="js/settings.js"></script>
-  <script language="javascript" type="text/javascript" src="js/gui.js"></script>
-  
-  <!-- CSS -->
-  <link rel="stylesheet" href="js/jstree/dist/themes/default/style.min.css" />
-  <link rel="stylesheet" type="text/css" href="js/jqplot/jquery.jqplot.css" />
-  <link rel="stylesheet" type="text/css" href="css/common.css" />
+    <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="excanvas.js"></script><![endif]-->
+    <!--   <script src="//code.jquery.com/jquery-1.11.0.min.js"></script> -->
+    <script language="javascript" type="text/javascript" src="js/jqplot/jquery.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/jqplot/jquery.jqplot.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.cursor.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.pieRenderer.js"></script>
+    <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.dateAxisRenderer.js"></script>
+    <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.canvasTextRenderer.js"></script>
+    <script language="javascript" type="text/javascript" src="js/jqplot/plugins/jqplot.canvasAxisLabelRenderer.js"></script>
+    
+    <script type="text/javascript" language="javascript" src="js/jstree/dist/jstree.min.js"></script>
+    
+    <script language="javascript" type="text/javascript" src="js/influx.js"></script>
+
+    <!--  Load the correct configuration    -->
+    <script language="javascript" type="text/javascript">
+	var qs = I.getQueryString();
+	cl(qs)
+	if (!qs.cfg) 
+	    qs.cfg = "default";
+	
+	var script = "<script language=\"javascript\" type=\"text/javascript\" src=\"js/config/"+qs.cfg+".cfg.js\"><\/script>";
+	document.write(script);
+    </script>
+    <script language="javascript" type="text/javascript" src="js/gui.js"></script>
+  <script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="js/jstree/dist/themes/default/style.min.css" />
+    <link rel="stylesheet" type="text/css" href="js/jqplot/jquery.jqplot.css" />
+    <link rel="stylesheet" type="text/css" href="css/common.css" />
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
 </head>
 <body>
   
@@ -45,10 +57,17 @@
 			  
 			  <div id="centercol"><!-- begin centercol -->
 			    <div id="flowContainer">
-			      <div id='df1' class="divfloat"></div>
+<!--			      <div id='df1' class="divfloat"></div>
 			      <div id='df0' class="divfloat"></div>
 			      <div id='df3' class="divfloat"></div>
-			      <div id='df4' class="divfloat"></div>
+			      <div id='df4' class="divfloat"></div>-->
+			    <div class="divfloat">
+				<div id='df0' class='divplot'>
+				</div>
+			    </div>
+			      <div class="divfloat"><div id='df1' class='divplot'></div></div>
+			      <div class="divfloat"><div id='df3' class='divplot'></div></div>
+			      <div class="divfloat"><div id='df4' class='divplot'></div></div>
 			    </div>
 			  </div><!-- end centercol -->
 				  
