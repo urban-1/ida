@@ -8,11 +8,11 @@ Influxdb DAshboard
 
 ## Intro
  
-This is an abstract influxdb dashboard. The main concept is that a DB server is 
-queried and all DBs and series are listed as a tree. Each series can be dragged and 
-dropped into a floating DIV element. At that moment a template is loaded 
-(templates/*) which has influx options and plotting options. The templates have 
-to be edited manually (JSON) atm... 
+This is an abstract influxdb dashboard using jqplot. The main concept is that a 
+DB server is queried and all DBs and series are listed as a tree. Each series can 
+be dragged and dropped into a floating DIV element. At that moment a template is 
+loaded (templates/*) which has influx options and plotting options. The templates
+have to be edited manually (JSON) atm... 
 
 This is far from being a production system, it is however very easy to setup
 (TODO: manual :) ) and one can get simple plots in 5-10 minutes
@@ -24,17 +24,17 @@ TODO: WTFM! (W from Write)
 We assume that you have already installed influxdb on any host in your network
 and it is accessible (API port) from the IDA host. The installation steps are:
 
-1. Clone the project (we prefer /opt/ida)
+1. Clone the project (we prefer `/opt/ida`)
 2. Setup your web server. If is apache, you can edit the config/ida file and
 place it in the correct folder of your distro.
-3. Edit the main web configuration (web/js/config/default.cfg.js) with the correct
+3. Edit the main web configuration (`web/js/config/default.cfg.js`) with the correct
 influxdb host/port values.
 4. If you have no data and you want to generate some, you can edit the scripts/vars.sh.
 These are simple shell scripts that will log CPU,memory,disk,traffic and ping 
 information to the influxdb. All series/data should be in dot format ie: 
 hostname.net.if.eth0
 
-At this point, visiting http://<youHost>/ida you should see a list of DBs and 
+At this point, visiting `http://<yourHost>/ida` you should see a list of DBs and 
 series. If you followed step #4, then make sure that your web configuration 
 includes "slmon" in the templates. These are basic templates for plotting monitoring
 data.
