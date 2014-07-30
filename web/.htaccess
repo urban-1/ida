@@ -1,6 +1,6 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /slmon/
+    RewriteBase /ida/
 
     # Base Map Page
     RewriteCond %{REQUEST_FILENAME} !-f
