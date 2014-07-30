@@ -3,6 +3,9 @@
 
 Influxdb DAshboard
 
+![Example Screenshot]
+(https://raw.github.com/urban-1/ida/master/images/demo.png)
+
 ## Intro
  
 This is an abstract influxdb dashboard. The main concept is that a DB server is 

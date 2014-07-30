@@ -200,7 +200,7 @@ processHistogramData: function(d){
   
   for (var i=0; i<len; i++) {
     var val= d.points[i][inlen-1];
-    if (val=="" || !val){
+    if ((val=="" || !val) && val!==0){
 	val="NA";
     }else if (val ==1 || val==0){
       val = (val==1) ? "True/Up" : "False/Down"
