@@ -53,7 +53,7 @@ is dropped in a plotting area, the template that matches closer the full series 
 will be used, examples:
  - series: `hostname.db.net.if.eth0`, matches template `net.if`
  - series: `hostname.db.net.if.lo`, matches template `net.if.lo` (overrides `net.if`)
- - series: `hostname.db.net.if.ra0`, matches template `hostname.db.net.if.lo`
+ - series: `hostname.db.net.if.ra0`, matches template `hostname.db.net.if.ra0`
  - etc...
 
 
