@@ -1,13 +1,30 @@
 
-
+// Gui tree
 var tree={};
+
+// Templates
 var TMPS={};
+
+// Plots
 var plots={};
+
+// Popup message (template select)
 var popup={};
+
+// Refresh timer to be able to cancel
+var refreshTimer=null;
+
+// Plot resizing options
+// helper fucks up!
 var resizeOpts = {
     containment: "#flowContainer"
 //       helper: "ui-resizable-helper"
 };
+
+var dtFormat = {
+    dateFormat: "yy-mm-dd",
+    timeFormat: "HH:mm:ss"
+}
 
 $().ready(function(){
     popup = new I.Popup();
@@ -15,22 +32,79 @@ $().ready(function(){
     for (var t=0; t<templates.length; t++){
 	$.getScript("js/templates/temp."+templates[t]+".json.js");
     }
-
-    $(window).on("resize", function(){
+    
+    /**
+     * resize can be triggered by the resizable
+     * divs. We do not want to update ALL plots
+     * when one is scaled
+     */
+    $(window).on("resize", function(e){
+	if (e.target!=window) {
+	    var plotId = $(e.target).children(":first").attr("id");
+	    if (plots[plotId])
+		plots[plotId].replot({resetAxes:['xaxis','yaxis']});
+	    return;
+	}
+		 
 	for (var p in plots){
 	    if (!plots[p].jq) return;
 	    plots[p].replot({resetAxes:['xaxis','yaxis']});
 	}
     })
     
+    // Refresh timer
     if (typeof INT === 'number') refresh(INT);
+    $('#stopRefresh').on("click", function(){
+	if (refreshTimer) {
+	    clearInterval(refreshTimer);
+	    refreshTimer=null;
+	    $(this).html("Start Refresh");
+	}
+	else if (typeof INT === 'number') {
+	    refresh(INT);
+	    $(this).html("Stop Refresh");
+	}
+    })
     
     // Add motion to the plots
     $('.divfloat').resizable(resizeOpts);
-    /*.on('resizestop',function(){
-	var id = $(this).children(":first").attr("id");
-// 	plots[id].replot();
-    });*/
+    
+    // DateTime fields
+    $('#startDT').datetimepicker(dtFormat);
+    $('#endDT').datetimepicker(dtFormat);
+    $('#updateDT').on("click", function(){
+	var start = $('#startDT').val();
+	var end   = $('#endDT').val();
+	
+	if (start=="" && end=="") return;
+	
+	var timeStr = "";
+	if (start!="" && end!="") {
+	    // Fool-proof code :)
+	    if ($('#endDT').datetimepicker('getDate') < $('#startDT').datetimepicker('getDate')){
+		var tmp = start;
+		$('#startDT').val(end);
+		start=end;
+		$('#endDT').val(tmp);
+		end = tmp;
+	    }
+	    timeStr+="time > '"+start+"' AND time < '"+end+"'";
+	}else if (start!="") timeStr+="time > '"+start+"'";
+	else if (end!="") timeStr+="time < '"+end+"'";
+	// Store the current time to be used when adding a new 
+	// plot
+	$('#curTime').val(timeStr);
+	
+	for (var p in plots){
+	    // We need to update plots that do not exist!
+	    // (They may had no data before...)
+// 	    if (!plots[p].jq) return;
+	    plots[p].setTime(timeStr);
+	    plots[p].fullRefresh({restoreZoom: false});
+	}
+	
+	
+    })
 
     // Bind dataChanged to populate tree
     $('body').on("dataChanged", function(e,d){
@@ -79,7 +153,7 @@ $().ready(function(){
   
   
   
-    $('.addDiv').on('click',function(){
+    $('#addDiv').on('click',function(){
 	var max = -1;
 	$('div[id^=df]').each(function(){
 	    var num = parseInt(this.id.replace("df",""));
@@ -96,7 +170,7 @@ $().ready(function(){
 })
 
 function refresh(INT){
-    setInterval(function(){
+    refreshTimer = setInterval(function(){
 	for (var p in plots){
 	    if (!plots[p].jq) return;
 	    plots[p].fullRefresh({restoreZoom:true});
@@ -106,26 +180,26 @@ function refresh(INT){
 
 
 function findTemplate(path){
-  var full = path.join('.');
-  var part = [path[1],path[2]].join('.');
-  var last = path[2];
-  var mini = path[2].split('.')
-  mini.pop()
-  mini = mini.join('.');
-  
-  // Argg domain exceptions
-  if (mini.indexOf("net.ping")!=-1){
-    mini = path[2].split('.')
-    mini = [mini[0],mini[1]].join(".");
-  }
-  cl(full,part,last,mini)
-  if (TMPS[full]) return TMPS[full];
-  if (TMPS[part]) return TMPS[part];
-  if (TMPS[last]) return TMPS[last];
-  if (TMPS[mini]) return TMPS[mini];
-  
-  
-  return false;
+    var full = path.join('.');
+    var part = [path[1],path[2]].join('.');
+    var last = path[2];
+    var mini = path[2].split('.')
+    mini.pop()
+    mini = mini.join('.');
+    
+    // Argg domain exceptions
+    if (mini.indexOf("net.ping")!=-1){
+	mini = path[2].split('.')
+	mini = [mini[0],mini[1]].join(".");
+    }
+    
+    if (TMPS[full]) return TMPS[full];
+    if (TMPS[part]) return TMPS[part];
+    if (TMPS[last]) return TMPS[last];
+    if (TMPS[mini]) return TMPS[mini];
+    
+    
+    return false;
 }
 
 function handlePlotDrop(event,target,path, tmpIdx) {
@@ -186,10 +260,12 @@ function handlePlotDrop(event,target,path, tmpIdx) {
       plots[id].jq.destroy();
   
   // Save the plot
-  plots[id] = new I.InfluxPlot($('#'+id),HOST,
-	      $.extend({},template.fluxOpts,{db:path[1],from: path[2]}),
-	      $.extend({},template.plotOpts,{title:title})
-	    );
+  plots[id] = new I.InfluxPlot($('#'+id),{
+		fluxHost: HOST,
+		flux: $.extend(true,{},template.fluxOpts,{db:path[1],from: path[2]}),
+		plot: $.extend(true,{},template.plotOpts,{title:title}),
+		curTime: ($('#curTime').val()!="") ? $('#curTime').val() : ""
+  });
 }
 
 

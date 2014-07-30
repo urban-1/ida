@@ -9,7 +9,6 @@ TMPS = $.extend({},TMPS,{
     },
     plotOpts:{
 	type: "time", 
-	kmgUnits: I.unitFormat,
 	cursor:{ 
 	    show: true,
 	    zoom:true, 
@@ -19,11 +18,17 @@ TMPS = $.extend({},TMPS,{
 	axesDefaults:{
 	    pad: 1.2
 	},
-	axes: {
-	    xaxis:{
-	      
-	    }
+	seriesDefaults:{
+	    showMarker: false
 	},
+	axes: {
+            yaxis: {
+                min: 0,
+                tickOptions: {
+                    formatter: I.Formatters.unitFormat
+                }
+            }
+        },
 	legend: {
 	    show:true, 
 	    location: 'nw',
@@ -45,6 +50,9 @@ TMPS = $.extend({},TMPS,{
 	type: "time", 
 	typeOpts: {
 	    minMax: true
+	},
+	seriesDefaults:{
+	    showMarker: false
 	},
 	cursor:{ 
 	    show: true,
@@ -85,6 +93,9 @@ TMPS = $.extend({},TMPS,{
     },
     plotOpts:{
 	type: "time", 
+	seriesDefaults:{
+	    showMarker: false
+	},
 	cursor:{ 
 	    show: true,
 	    zoom:true, 
@@ -148,6 +159,9 @@ TMPS = $.extend({},TMPS,{
 	},
 	plotOpts:{
 	    type: "time", 
+	    seriesDefaults:{
+		showMarker: false
+	    },
 	    cursor:{ 
 		show: true,
 		zoom:true, 
@@ -167,7 +181,9 @@ TMPS = $.extend({},TMPS,{
     },
     plotOpts:{
 	type: "time", 
-	kmgUnits: I.unitFormat1024,
+	seriesDefaults:{
+	    showMarker: false
+	},
 	cursor:{ 
 	    show: true,
 	    zoom:true, 
@@ -179,9 +195,13 @@ TMPS = $.extend({},TMPS,{
 	},
 	axes: {
 	    yaxis:{
-		label: "Bytes (1024 KMG)"
+		label: "Bytes (1024 KMG)",
+		min: 0,
+                tickOptions: {
+                    formatter: I.Formatters.unitFormat1024
+                }
 	    }
-	},
+        },
 	legend: {
 	    show:true, 
 	    location: 'nw',
@@ -199,7 +219,6 @@ TMPS = $.extend({},TMPS,{
     },
     plotOpts:{
 	type: "time", 
-	kmgUnits: I.unitFormat,
 	stackSeries: true,
 	showMarker: false,
 	seriesDefaults: {
@@ -216,7 +235,11 @@ TMPS = $.extend({},TMPS,{
 	},
 	axes: {
 	    yaxis: {
-	      label: 'Bytes'
+		label: 'Bytes',
+		min: 0,
+		tickOptions: {
+		    formatter: I.Formatters.unitFormat
+		}
 	    }
 	},
 	legend: {

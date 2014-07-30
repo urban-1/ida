@@ -1,84 +1,48 @@
 
- 
-var I = {
-  version: "0.1"
-};
-
-cl =  Function.prototype.bind.call(console.log,console);
-
-I.unitFormat1024 = function (format, val) { 
-  if (typeof val == 'number') { 
-      if (!format) { 
-	  format = '%.1f'; 
-      } 
-      if (Math.abs(val) >= 1073741824 ) {
-	  return (val / 1073741824).toFixed(1) + 'G';
-      }
-      if (Math.abs(val) >= 1048576 ) {
-	  return (val / 1048576 ).toFixed(1) + 'M';
-      }
-      if (Math.abs(val) >= 1024) {
-	  return (val / 1024).toFixed(1) + 'K';
-      }
-      return String(val.toFixed(1));
-  } 
-  else { 
-      return String(val); 
-  }
-}
-
-I.unitFormat = function (format, val) { 
-  if (typeof val == 'number') { 
-      if (!format) { 
-	  format = '%.1f'; 
-      } 
-      if (Math.abs(val) >= 1000000000 ) {
-	  return (val / 1000000000).toFixed(1) + 'G';
-      }
-      if (Math.abs(val) >= 1000000 ) {
-	  return (val / 1000000 ).toFixed(1) + 'M';
-      }
-      if (Math.abs(val) >= 1000) {
-	  return (val / 1000).toFixed(1) + 'K';
-      }
-      return String(val.toFixed(1));
-  } 
-  else { 
-      return String(val); 
-  }
-} 
 
 /**
- * Constructor: Element, flux host, flux options (template,db,series), plot options
+ * Constructor: Element, Options: 
+ * 
+ * flux host, flux options (template,db,series), plot options
+ * and curTime. If the curTime is provided, the constructor will call setTime before
+ * loading the plot (to avoid 2ble tapping the db)
  */
-I.InfluxPlot = function (el,fluxHost,flux,plot){
+I.InfluxPlot = function (el,opts){
   this.el = el;
 
-  this.flux = flux;
-  this.fluxHost = fluxHost;
-  this.plot = plot
+  this.flux = $.extend(true,{},opts.flux);
+  this.fluxHost = $.extend(true,{},opts.fluxHost);
+  this.plot = $.extend(true,{},opts.plot);
   this.data={}; // Not used atm
+  
+  // If time is "" use the default 
+  // from the template
+  if (opts.curTime) {
+      this.setTime(opts.curTime);
+  }
+  
+  // Before calling _init, get all parameters!
+  this._handleParams();
+  
+  // Init with default zoom
   this._init();
 }
 
-/**
- * Get query string as array (special case)
- */
-I.getQueryString = function() {
-    var qs = {};
-    var query = window.location.href;
-    query = query.replace("http:\/\/","");
-    query = query.split('/');
-    
-    qs.host = query[0];
-    qs.webRoot = query[1];
-    qs.cfg = query[2];
-  
-    return qs;
-}
+
 
 
 I.InfluxPlot.prototype = {
+    
+    _handleParams: function(){
+	var len = this.flux.where.length;
+	for (var i=0; i<len; i++){
+	    if (typeof this.flux.where[i]=="string") continue;
+	    var param = this.flux.where[i];
+	    var value = window.prompt(param.prompt,"");
+	    // Error control here?
+	    this.flux.where[i] = param.pattern.replace("{}","'"+value+"'");
+	}
+    },
 
 /**
  * Init a graph. If cursor is given, zoom to that 
@@ -89,13 +53,14 @@ _init: function (cursor){
   
   
   var q="select "+f.select.join(',')+" from "+f.from;
-  if (f.where) q+=" where "+f.where.join(',');
+  if (f.where) q+=" where "+f.where.join(' AND ');
   if (f.group) q+=" group by "+f.group;
   
   var ifplot = this;
+//   cl(q)
   this.fluxHost._post(q,f.db,null,function(d){
     ifplot.processData(d);
-    if (cursor) {
+    if (cursor && ifplot.plot.type=="time") {
 	var c = ifplot.jq.plugins.cursor;
 	ifplot.jq.plugins.cursor=cursor;
 	var dataP = cursor._zoom.datapos;
@@ -112,10 +77,14 @@ _init: function (cursor){
 /**
  * Re-initializes fetching data and ploting
  */
-fullRefresh: function(){
+fullRefresh: function(opts){
     var z = false
-    if (this.jq!==undefined) {
-	z = $.extend({},this.jq.plugins.cursor);
+    
+    if (this.jq) {
+	
+	if (opts.restoreZoom)
+	    z = $.extend({},this.jq.plugins.cursor);
+	
 	this.jq.destroy();
 	this.jq = null;
 	this.el.empty();
@@ -128,7 +97,7 @@ fullRefresh: function(){
  * since date may change to time, etc
  */
 replot: function(opts){
-    this.jq.replot(opts);
+    if (this.jq) this.jq.replot(opts);
 },
 
 /**
@@ -138,25 +107,45 @@ redraw: function(){
   this.jq.redraw();
 },
 
+setTime: function(newTime){
+    if (newTime=="") 
+	newTime="time > now() -1h";
+    
+    var len = this.flux.where.length;
+    
+    for (var i=len-1; i>=0; i--){
+	if (typeof this.flux.where[i]!="string") continue;
+	if (this.flux.where[i].indexOf("time")!=-1){
+	    this.flux.where.splice(i,1);
+	    i--;
+	}
+    }
+    this.flux.where.push(newTime)
+},
+
 
 /**
  * Process RAW reply from InfluxHost
  */
 processData: function(d){
   
-  if (!d) return;
-  if (!d.length) return;
-  
-  // Before sending to the rest, check
-  // that the data are same order as the
-  // select....
-  this._shortLegend(d);
-  
-  // Check plot type
-  if (this.plot.type == "time") 
-    this.processTimeSeriesData(d[0]);
-  else if (this.plot.type == "histogram") 
-    this.processHistogramData(d[0]);
+    if (!d) return;
+    if (!d.length) {
+// 	this.el.html("No data for "+this.plot.title)
+	return;
+    }
+    this.el.html("")
+    
+    // Before sending to the rest, check
+    // that the data are same order as the
+    // select....
+    this._shortLegend(d);
+    
+    // Check plot type
+    if (this.plot.type == "time") 
+	this.processTimeSeriesData(d[0]);
+    else if (this.plot.type == "histogram") 
+	this.processHistogramData(d[0]);
 },
 
 _shortLegend: function(d){
@@ -174,7 +163,7 @@ _shortLegend: function(d){
     
     
     for (var from=0; from<sel.length; from++){
-	cl(sel[from])
+	
 	var to = col.indexOf(sel[from]);
 	// Invalid, may be a mean
 	if (to == -1) break;
@@ -207,13 +196,25 @@ processHistogramData: function(d){
   var cpos  = d.columns.indexOf("count");
   var plotData = [];
   
+  
+  
   for (var i=0; i<len; i++) {
     var val= d.points[i][inlen-1];
-    if (val ==1 || val==0){
+    if (val=="" || !val){
+	val="NA";
+    }else if (val ==1 || val==0){
       val = (val==1) ? "True/Up" : "False/Down"
-    } 
-    plotData.push([val,d.points[i][cpos]]); // fixme: get count pos
+    }
+    
+    // Add meta-data?
+//     var meta={}
+//     for (var j=0; j<inlen; j++) {
+// 	meta[d.columns[j]] = d.points[i][j];
+//     }
+    
+    plotData.push([val,d.points[i][cpos]/*,meta*/]); // fixme: get count pos
   }
+  
   this.jq = $.jqplot(this.el.attr("id"), [plotData], this.plot);
 },
 
@@ -271,10 +272,10 @@ processTimeSeriesData: function(d){
     {axes:{xaxis:{renderer:$.jqplot.DateAxisRenderer}}}
   );
   
-  // TODO:Maybe move into templates
-  this.plot = $.extend(true,this.plot,
-    {seriesDefaults:{showMarker:false}}
-  );
+//   // TODO:Maybe move into templates
+//   this.plot = $.extend(true,this.plot,
+//     
+//   );
   
   if (isMinMax){
       this.plot = $.extend(true,this.plot,{
@@ -287,22 +288,6 @@ processTimeSeriesData: function(d){
             }
         }]
     });
-  }
-  
-
-  
-  if (typeof this.plot.kmgUnits=='function') {
-    var options = {
-        axes: {
-            yaxis: {
-                min: 0,
-                tickOptions: {
-                    formatter: this.plot.kmgUnits
-                }
-            }
-        }
-    };
-    this.plot = $.extend(true,options,this.plot);
   }
   
   this.jq = $.jqplot(this.el.attr("id"), plotData, this.plot);
