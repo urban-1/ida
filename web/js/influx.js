@@ -35,13 +35,19 @@ I.InfluxPlot.prototype = {
     
     _handleParams: function(){
 	var len = this.flux.where.length;
+	var titleExt = []
 	for (var i=0; i<len; i++){
 	    if (typeof this.flux.where[i]=="string") continue;
 	    var param = this.flux.where[i];
 	    var value = window.prompt(param.prompt,"");
 	    // Error control here?
-	    this.flux.where[i] = param.pattern.replace("{}","'"+value+"'");
+	    var nval = param.pattern.replace("{}","'"+value+"'");
+	    this.flux.where[i] = nval;
+	    titleExt.push(nval);
 	}
+	
+	this.plot.title = this.plot.title+"("+titleExt.join(',')+")";
+	alert(this.plot.title)
     },
 
 /**
@@ -131,10 +137,18 @@ processData: function(d){
   
     if (!d) return;
     if (!d.length) {
-// 	this.el.html("No data for "+this.plot.title)
+	this.el.html("No data for "+this.plot.title)
+	this.el.css({
+	    width: '',
+	    height: ''
+	})
 	return;
     }
-    this.el.html("")
+    this.el.html("");
+    this.el.css({
+	width: '100%',
+	height: '100%'
+    })
     
     // Before sending to the rest, check
     // that the data are same order as the
