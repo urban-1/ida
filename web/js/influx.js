@@ -45,9 +45,8 @@ I.InfluxPlot.prototype = {
 	    this.flux.where[i] = nval;
 	    titleExt.push(nval);
 	}
-	
-	this.plot.title = this.plot.title+"("+titleExt.join(',')+")";
-	alert(this.plot.title)
+	if (titleExt.length)
+	    this.plot.title = this.plot.title+"("+titleExt.join(',')+")";
     },
 
 /**
