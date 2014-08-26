@@ -47,7 +47,6 @@ I.InfluxPlot.prototype = {
 	}
 	
 	this.plot.title = this.plot.title+"("+titleExt.join(',')+")";
-	alert(this.plot.title)
     },
 
 /**

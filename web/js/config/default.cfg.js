@@ -1,12 +1,12 @@
 
 var HOST = new I.InfluxHost({
-    host :"scampus",
+    host :"serusl11",
     port:8086,
     user: "root",
     pass: "root",
-    exclude:["urban"]
+    exclude:[]
   });
-var templates = ["maps"];
+var templates = ["dancer"];
 
 // var INT=5000
 

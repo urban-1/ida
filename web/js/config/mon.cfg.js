@@ -1,13 +1,13 @@
 
 // TODO: Multiple hosts, settings file from URL + mod_rewrite
 var HOST = new I.InfluxHost({
-    host :"serusl03",
+    host :"serusl11",
     port:8086,
     user: "root",
     pass: "root",
-    exclude:["mon.serusl06"]
+    exclude:[""]
   });
-var templates = ["slmon"];
+var templates = ["dancer"];
 
 // Refresh interval
 // INT=3000;
