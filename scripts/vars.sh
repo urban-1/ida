@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Configuration
+# Monitoring Configuration
 #
 
 # Database...

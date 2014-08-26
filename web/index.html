@@ -15,7 +15,6 @@
     
     <script language="javascript" type="text/javascript" src="js/I.js"></script>
     <script language="javascript" type="text/javascript" src="js/influx.js"></script>
-<!--     <script language="javascript" type="text/javascript" src="js/templates/temp.slmon.json.js"></script> -->
     <script language="javascript" type="text/javascript" src="js/gui.js"></script>
 
     <!--  Load the correct configuration    -->
@@ -40,11 +39,12 @@
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
 </head>
 <body>
-  
-  <div id="header"><!-- begin header -->
-	  <h1>SLMon: Simple Linux Monitoring "System"</h1>
-  </div><!-- end header -->
 
+	
+	<div id="header">  <!-- begin header -->
+	  <h1>InfluxDB Data Visualization Platform</h1>
+	</div><!-- end header -->
+	<br><br/>
   <div id="wrapper1"><!-- sets background to white and creates full length leftcol-->
 	  
 	  <div id="wrapper2"><!-- sets background to white and creates full length rightcol-->
@@ -52,9 +52,11 @@
 	  <div id="maincol"><!-- begin main content area -->
 				  
 			  <div id="leftcol"><!-- begin leftcol -->
+			    <div>
 				  <p>Available hosts, databases and series</p>
 				  <div id='hostList'>
 				  </div>
+			    </div>
 			  </div><!-- end leftcol -->
 						  
 			  <div id="rightcol">
@@ -62,8 +64,9 @@
 			    <button id='addDiv'>Add new plot</button>
 			    <button id='stopRefresh'>Stop refresh</button>
 			    <h3>Date/Time For board</h3>
-			    Start:<input type='text' id='startDT'/>
-			    End:<input type='text' id='endDT'/>
+			    Start:<br/><input type='text' id='startDT'/>
+			    <br/>
+			    End:<br/><input type='text' id='endDT'/>
 			    <button id='updateDT'>Update Plots</button>
 			    <input type='hidden' id='curTime'/>
 			    
@@ -71,10 +74,6 @@
 			  
 			  <div id="centercol"><!-- begin centercol -->
 			    <div id="flowContainer">
-<!--			      <div id='df1' class="divfloat"></div>
-			      <div id='df0' class="divfloat"></div>
-			      <div id='df3' class="divfloat"></div>
-			      <div id='df4' class="divfloat"></div>-->
 			    <div class="divfloat">
 				<div id='df0' class='divplot'>
 				</div>
@@ -86,9 +85,9 @@
 			  </div><!-- end centercol -->
 				  
 		  </div><!-- end main content area -->
-				  
+
 		  <div id="footer"><!-- begin footer -->
-			  <p> &copy; (from &copy;ontributors) Urb@n</p>
+			  <p> &copy;ontributors: Urb@n, DANCER Project</p>
 		  </div><!-- end footer -->
 	  
 	  </div><!-- end wrapper1 -->

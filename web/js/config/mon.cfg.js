@@ -5,7 +5,7 @@ var HOST = new I.InfluxHost({
     port:8086,
     user: "root",
     pass: "root",
-    exclude:["mon.serusl06"]
+    exclude:[""]
   });
 var templates = ["slmon"];
 

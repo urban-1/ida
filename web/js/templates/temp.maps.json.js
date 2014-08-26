@@ -79,9 +79,15 @@ TMPS = $.extend({},TMPS,{
     },
     plotOpts:{
 	  type: "time", 
+	  cursor:{ 
+	    show: true,
+	    zoom:true, 
+	    showTooltip:true
+	  },
 	  legend: {
 	    show:true, 
-	    location: 'e'
+	    location: 'nw',
+	    labels: ["Searches/Hour"]
 	  }
     }
   }

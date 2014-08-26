@@ -41,6 +41,7 @@ $().ready(function(){
     $(window).on("resize", function(e){
 	if (e.target!=window) {
 	    var plotId = $(e.target).children(":first").attr("id");
+	    
 	    if (plots[plotId])
 		plots[plotId].replot({resetAxes:['xaxis','yaxis']});
 	    return;
@@ -204,22 +205,23 @@ function findTemplate(path){
 
 function handlePlotDrop(event,target,path, tmpIdx) {
 
-  var id = target.id;
+  
   var classN = target.className;
-  
-  
-  if (classN.indexOf('divplot')==-1 && classN.indexOf('jqplot')==-1) return;
-  else if (classN.indexOf('divplot')==-1 && classN.indexOf('jqplot')>-1) {
   cl(target)
-  cl(classN.indexOf('jqplot'))
-    var n = target;
-    while (n && n.className.indexOf('divplot')==-1){
-      n = n.parentNode;
-      cl(n)
-    }
-    id = n.id;
-  }
   
+  if (classN.indexOf('divfloat')==-1 && classN.indexOf('jqplot')==-1 && classN.indexOf('divplot')==-1) return;
+  else if (classN.indexOf('jqplot')>-1 || classN.indexOf('divplot')>-1 ) {
+    var n = target;
+    while (n && n.className.indexOf('divfloat')==-1){
+      n = n.parentNode;
+    }
+    target = n;
+  }
+  if (!target)
+      return;
+  
+  // Each float has 1 plot
+  var id = $(target).find('.divplot')[0].id;
   
   var template = findTemplate(path);
   if (!template) {

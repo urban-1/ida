@@ -4,7 +4,7 @@ var HOST = new I.InfluxHost({
     port:8086,
     user: "root",
     pass: "root",
-    exclude:["urban"]
+    exclude:[""]
   });
 var templates = ["maps"];
 
