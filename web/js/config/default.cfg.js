@@ -1,1 +1,0 @@
-./mon.cfg.js
