@@ -52,6 +52,21 @@ a:hover {
 	box-shadow: 0px 5px 6px #999;
 /* 	color:#FFF; */
 }
+
+
+#footer {
+	position:relative;
+	/*top:1px;(/
+	/*width:100%;
+	clear:both;*/
+	margin:0;
+	padding:10px;
+	text-align:center;
+	background: #00628B;
+	border-radius: 10px;
+	box-shadow: 0px 5px 6px #999;
+/* 	color:#CCC; */
+} 
 	
 div#header h1{
    padding:0.4em;
@@ -68,42 +83,42 @@ div#header h1{
 #maincol {
 	position:relative;
 	margin:0;
+	margin-bottom:100px;
 	padding:10px;
 }
 	
 #leftcol { 
 	position: fixed;
 	left: 30;
-	width:220px;  /* for IE5/WIN */
+	width: 200px;  /* for IE5/WIN */
 	voice-family: "\"}\"";
 	voice-family:inherit;
-	width:200px; /* actual value */
-	margin-bottom: 6cm;
+	width: 15%; /* actual value */
 	padding: 10px; 
-	z-index: 100;
-	height: 50%;
-	min-height: 500px;
+	z-index: 99;
+	height: 500px;
+	max-height: 50%;
 	border-radius: 5px;
 	box-shadow: 5px 5px 5px #888888;
 	overflow: auto;
 	background: -webkit-radial-gradient(white, lightgrey);	/* For Safari 5.1 to 6.0 */
-  background: -o-radial-gradient(white, lightgrey); 			/* For Opera 11.1 to 12.0 */
-  background: -moz-radial-gradient(white, lightgrey); 		/* For Firefox 3.6 to 15 */
-  background: radial-gradient(white, lightgrey); 					/* Standard syntax */
+	background: -o-radial-gradient(white, lightgrey); 			/* For Opera 11.1 to 12.0 */
+	background: -moz-radial-gradient(white, lightgrey); 		/* For Firefox 3.6 to 15 */
+	background: radial-gradient(white, lightgrey); 					/* Standard syntax */
 }
+
 
 #rightcol {
 	position: fixed;
   right: 30;
-	width:220px;  /* for IE5/WIN */
+	width: 200px;  /* for IE5/WIN */
 	voice-family: "\"}\"";
 	voice-family:inherit;
-	width:200px; /* actual value */
-	margin-bottom: 6cm;
-	padding: 10px;
-	z-index: 99;
-	height: 50%;
-	min-height: 500px;
+	width:15%; /* actual value */
+	padding: 15px;
+	z-index: 98;
+	height: 500px;
+	max-height: 50%;
 	border-radius: 5px;
 	box-shadow: 5px 5px 5px #888888;	
 	overflow: auto;
@@ -115,8 +130,9 @@ div#header h1{
 	
 #centercol {
 	position:relative;
-	padding:0 240px;
-/* 	padding-left:240px; */
+	padding:2% 20% 2% 20%;
+	width: 100%;
+	/* 	padding-left:240px; */
 }
 
 #centercol a {
@@ -127,20 +143,6 @@ div#header h1{
 	border-bottom:1px solid;
 /* 	color:#9343B9; */
 }
-
-#footer {
-	position:relative;
-	top:1px;
-	width:100%;
-	clear:both;
-	margin:0;
-	padding:1% 0;
-	text-align:center;
-	background: #00628B;
-	border-radius: 10px;
-	box-shadow: 0px 5px 6px #999;
-/* 	color:#CCC; */
-} 
 	
 .divfloat{
   display: inline-block;
@@ -210,3 +212,26 @@ div#header h1{
     border-top: solid 1px #CCC;
 }
 
+
+/* TABLES */
+
+table.form_table{
+  border: 10px;
+  width: 90%;
+  margin: 0 auto;
+  font-size: 1em;
+}
+
+table.form_table td {
+  height: 50px;
+  padding: 0 20px;
+  text-align: center;
+  border-bottom: 0px;
+}
+
+/* Text Areas */
+textarea.textarea_simple {
+	max-width: 100%;
+	width: 100%;
+	min-height: 300px;
+}

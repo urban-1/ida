@@ -32,7 +32,7 @@
     <script language="javascript" type="text/javascript" src="js/jquery-ui-timepicker-addon.js"></script>
     
     <!-- CSS -->
-    <link rel="stylesheet" href="js/jstree/dist/themes/default/style.min.css" />
+    <link rel="stylesheet" href="js/jstree/dist/themes/default/style.css" />
     <link rel="stylesheet" type="text/css" href="js/jqplot/jquery.jqplot.css" />
     <link rel="stylesheet" type="text/css" href="css/common.css" />
     <link rel="stylesheet" type="text/css" href="css/dtpicker.css" />
@@ -40,7 +40,6 @@
 </head>
 <body>
 
-	
 	<div id="header">  <!-- begin header -->
 	  <h1>InfluxDB Data Visualization Platform</h1>
 	</div><!-- end header -->
@@ -52,9 +51,11 @@
 	  <div id="maincol"><!-- begin main content area -->
 				  
 			  <div id="leftcol"><!-- begin leftcol -->
+			    <div>
 				  <p>Available hosts, databases and series</p>
 				  <div id='hostList'>
 				  </div>
+			    </div>
 			  </div><!-- end leftcol -->
 						  
 			  <div id="rightcol">
@@ -83,16 +84,70 @@
 			  </div><!-- end centercol -->
 				  
 		  </div><!-- end main content area -->
-				  
-			<br><br/>
-			<br><br/>
-			<br><br/>
+		  
 		  <div id="footer"><!-- begin footer -->
-			  <p> &copy; (DANCER Project & &copy;ontributors) Urb@n</p>
+			  <p> &copy;ontributors: Urb@n, DANCER Project</p>
 		  </div><!-- end footer -->
 	  
 	  </div><!-- end wrapper1 -->
 
   </div><!-- end wrapper2 -->
+  
+<!-- Hidden Templates form -->
+	<div id="edit-temp-form" title="Set Template Information" path="" style="display:none; background-color:lightgrey">
+		
+		<div id="tabs-movie">
+		  <ul>
+		    <li><a href="#tab-form">Edit Form</a></li>
+		    <li><a href="#tab-edit">Manual Edit</a></li>
+		  </ul>
+		  <div id="tab-form">
+		    <p style="text-align:left;">
+				Please set the information for a new template of select an exisintg one to change its information. If none of these two options is suitable, you can choose to edit the template by hand. Only be careful of the changes!
+				</p>
+				<table class='form_table'>
+					<tr>
+						<td><strong>Template Name:</strong></td>
+						<td><input type='text' name='temp_name' value='' /></td>
+						<td>or <select id="template-select" style='width:150px' name='temp_name_sel' onchange="fillInForm($(this));">
+						<option value=""></option>
+						</select>
+						</td>
+					</tr>
+					<tr>
+						<td><strong>SELECT:</strong></td> 
+						<td><input type='text' name='temp_select' value='' /></td>
+					</tr>
+					<tr>
+						<td><strong>WHERE:</strong></td> 
+						<td><input type='text' name='temp_where' value='' /></td>
+					</tr>
+					<tr>
+						<td><strong>GROUP BY:</strong></td> 
+						<td><input type='text' name='temp_group' value='' /></td>
+					</tr>
+					<tr>
+						<td><strong>Template Type:</strong></td>
+						<td><select style='width:200px' name='temp_type'>
+						<option value="lines">Line Graph</option>
+						<option value="pie">Pie Chart</option>
+						</select></td>
+					</tr>
+				</table>
+		  </div>
+		  <div id="tab-edit">
+		    <textarea class="textarea_simple" id="template_textfield"></textarea>
+		  </div>
+ 		</div>		
+	</div>
+<!--  End of Templates Form  -->
+
+
+<!--     Message Form   -->
+<div id="message-dialog" title="Notice!" style="display:none; background-color:lightgrey">
+	<p id='message'></p>
+</div>
+<!-- End of Message Form -->
+
 </body>
 </html>
