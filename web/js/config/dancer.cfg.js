@@ -6,7 +6,7 @@ var HOST = new I.InfluxHost({
     pass: "root",
     exclude:[]
   });
-var templates = ["dancer"];
+var templates = ["dancer","auto"];
 
 // var INT=5000
 

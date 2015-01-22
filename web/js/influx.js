@@ -54,13 +54,13 @@ I.InfluxPlot.prototype = {
  * cursor level!
  */
 _init: function (cursor){
-  var f = this.flux
+  var f = this.flux;
   
   
   var q="select "+f.select.join(',')+" from "+f.from;
   if (f.where) q+=" where "+f.where.join(' AND ');
   if (f.group) q+=" group by "+f.group;
-  
+
   var ifplot = this;
 //   cl(q)
   this.fluxHost._post(q,f.db,null,function(d){
